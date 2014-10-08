@@ -1,35 +1,45 @@
 library(shiny)
 
-# Rely on the 'WorldPhones' dataset in the datasets
-# package (which generally comes preloaded).
-library(datasets)
+load("data.Rdata")
+d.in <- d.in2
 
-wd.datapath <- paste0(getwd(),"/data")
-wd.init <- getwd()
-setwd(wd.datapath)
+catvars.z <- subset(data.frame(val = sapply(d.in2, is.factor)), val == TRUE)
+catvars <- row.names(catvars.z)
 
-d.in <- read.table("WorldPhones2.csv", head = TRUE)
-setwd(wd.init)
+contvars.z <- subset(data.frame(val = sapply(d.in2, is.factor)), val == FALSE)
+contvars <- row.names(contvars.z)
 
 # Define a server for the Shiny app
+
 shinyServer(function(input, output) {
   
-  output$ui <- renderUI({sidebarPanel(
-    selectInput("region", "Region:", 
-                choices=colnames(d.in)),
+  output$ui <- renderUI({
+    if (is.null(input$input_type))
+      return()
     
-    hr(),
     
-    helpText("Data from AT&T (1961) The World's Telephones."),
-    
-    submitButton("Update View")
-    
-  )
+    # Depending on input$input_type, we'll generate a different
+    # UI component and send it to the client.
+    switch(input$input_type,
+           "descriptive" = selectInput("dynamic", "Continuous variables:", 
+                                         choices=contvars),
+           
+           "tabular" = selectInput("dynamic", "Categorical variables:", 
+                                     choices=catvars)
+    )
   })
-    
+  
+  
   output$summary <- renderPrint({
   
-    summary(d.in[, input$region]) 
+      # goal here is to route the evaluation of the data based on input_type
+    
+      if (input$input_type == "descriptive") {
+          summary(d.in[, input$dynamic]) 
+      } else {
+      table(d.in[, input$dynamic]) 
+      }
+      
+      })
   
-    })
 })
