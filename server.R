@@ -1,30 +1,35 @@
 library(shiny)
-library(ggplot2)
 
+# Rely on the 'WorldPhones' dataset in the datasets
+# package (which generally comes preloaded).
+library(datasets)
+
+wd.datapath <- paste0(getwd(),"/data")
+wd.init <- getwd()
+setwd(wd.datapath)
+
+d.in <- read.table("WorldPhones2.csv", head = TRUE)
+setwd(wd.init)
+
+# Define a server for the Shiny app
 shinyServer(function(input, output) {
   
-  dataset <- reactive(function() {
-    diamonds[sample(nrow(diamonds), input$sampleSize),]
+  output$ui <- renderUI({sidebarPanel(
+    selectInput("region", "Region:", 
+                choices=colnames(d.in)),
+    
+    hr(),
+    
+    helpText("Data from AT&T (1961) The World's Telephones."),
+    
+    submitButton("Update View")
+    
+  )
   })
+    
+  output$summary <- renderPrint({
   
-  output$plot <- reactivePlot(function() {
-    
-    p <- ggplot(dataset(), aes_string(x=input$x, y=input$y)) + geom_point()
-    
-    if (input$color != 'None')
-      p <- p + aes_string(color=input$color)
-    
-    facets <- paste(input$facet_row, '~', input$facet_col)
-    if (facets != '. ~ .')
-      p <- p + facet_grid(facets)
-    
-    if (input$jitter)
-      p <- p + geom_jitter()
-    if (input$smooth)
-      p <- p + geom_smooth()
-    
-    print(p)
-    
-  }, height=700)
+    summary(d.in[, input$region]) 
   
+    })
 })

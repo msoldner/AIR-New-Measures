@@ -1,29 +1,30 @@
 library(shiny)
-library(ggplot2)
 
-dataset <- diamonds
+# Rely on the 'WorldPhones' dataset in the datasets
+# package (which generally comes preloaded).
+library(datasets)
 
-shinyUI(pageWithSidebar(
+# Define the overall UI
+shinyUI(
   
-  headerPanel("Diamonds Explorer"),
-  
-  sidebarPanel(
+  # Use a fluid Bootstrap layout
+  fluidPage(    
     
-    sliderInput('sampleSize', 'Sample Size', min=1, max=nrow(dataset),
-                value=min(1000, nrow(dataset)), step=500, round=0),
+    # Give the page a title
+    titlePanel("Telephones by region"),
     
-    selectInput('x', 'X', names(dataset)),
-    selectInput('y', 'Y', names(dataset), names(dataset)[[2]]),
-    selectInput('color', 'Color', c('None', names(dataset))),
-    
-    checkboxInput('jitter', 'Jitter'),
-    checkboxInput('smooth', 'Smooth'),
-    
-    selectInput('facet_row', 'Facet Row', c(None='.', names(dataset))),
-    selectInput('facet_col', 'Facet Column', c(None='.', names(dataset)))
-  ),
-  
-  mainPanel(
-    plotOutput('plot')
+    # Generate a row with a sidebar
+    sidebarLayout(      
+      
+      # Define the sidebar with one input
+     uiOutput("ui"),
+      
+      # Create a spot for the barplot
+      mainPanel(
+        h4("Summary"),
+        verbatimTextOutput("summary")  
+      )
+      
+    )
   )
-))
+)
