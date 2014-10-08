@@ -1,12 +1,11 @@
 library(shiny)
 
-load("data.Rdata")
-d.in <- d.in2
+load("data2.Rdata")
 
-catvars.z <- subset(data.frame(val = sapply(d.in2, is.factor)), val == TRUE)
+catvars.z <- subset(data.frame(val = sapply(d.in, is.factor)), val == TRUE)
 catvars <- row.names(catvars.z)
 
-contvars.z <- subset(data.frame(val = sapply(d.in2, is.factor)), val == FALSE)
+contvars.z <- subset(data.frame(val = sapply(d.in, is.factor)), val == FALSE)
 contvars <- row.names(contvars.z)
 
 # Define a server for the Shiny app
@@ -24,8 +23,13 @@ shinyServer(function(input, output) {
            "descriptive" = selectInput("dynamic", "Continuous variables:", 
                                          choices=contvars),
            
-           "tabular" = selectInput("dynamic", "Categorical variables:", 
-                                     choices=catvars)
+           "oneway" = selectInput("dynamic", "Categorical variables:", 
+                                     choices=catvars),
+           
+           "twoway" = selectInput("dynamic", "Cross-tabulation:",
+                                  choices = catvars,
+                                  selected = c(catvars[1], catvars[2]),
+                                  multiple = TRUE)
     )
   })
   
@@ -36,8 +40,12 @@ shinyServer(function(input, output) {
     
       if (input$input_type == "descriptive") {
           summary(d.in[, input$dynamic]) 
-      } else {
-      table(d.in[, input$dynamic]) 
+      } else if (input$input_type == "oneway") {
+          table(d.in[, input$dynamic]) 
+      } else if (input$input_type == "twoway") {
+          row <- d.in[, input$dynamic[1]]
+          col <- d.in[, input$dynamic[2]]
+          table(row, col)
       }
       
       })

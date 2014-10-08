@@ -6,17 +6,19 @@ shinyUI(fluidPage(
     
     column(3, wellPanel(
       selectInput("input_type", "Option",
-                  c("descriptive", "tabular"
+                  c("descriptive", "oneway", "twoway"
                   )
-      )
+      ),
+      submitButton("Select type")
     )),
     
     column(3, wellPanel(
       # This outputs the dynamic UI component
-      uiOutput("ui")
+      uiOutput("ui"),
+      submitButton("Select variables")
     )),
     
-    column(3, wellPanel(
+    column(6, wellPanel(
            h4("Output"),
            verbatimTextOutput("summary")
     )
